@@ -233,6 +233,7 @@ td input:focus{outline:none;border-color:var(--gold);}
       <div class="topbar-stage" id="topbarStage"></div>
     </div>
     <button class="report-btn" onclick="openReport()">📊 تقرير</button>
+    <button class="report-btn" style="background:#1a3a1a;color:#00e676;border:1px solid #00e676;margin-right:6px;" onclick="openClientReport()">👤 تقرير عميل</button>
   </div>
 
   <header class="main-header">
@@ -317,6 +318,16 @@ td input:focus{outline:none;border-color:var(--gold);}
   <div class="report-body" id="reportBody"></div>
 </div>
 
+<div id="clientReportScreen" style="display:none">
+  <div class="report-topbar">
+    <button class="back-btn" onclick="closeClientReport()">← رجوع للمشروع</button>
+    <div class="topbar-info">
+      <div class="topbar-name">👤 تقرير العميل</div>
+    </div>
+  </div>
+  <div class="report-body" id="clientReportBody"></div>
+</div>
+
 <div class="modal-bg" id="modalBg">
   <div class="modal">
     <h3>➕ مشروع جديد</h3>
@@ -343,7 +354,7 @@ const saveProj = (id, d) => localStorage.setItem('proj_' + id, JSON.stringify(d)
 
 /* ---- SCREENS ---- */
 function show(id) {
-  ['projectsScreen', 'appScreen', 'reportScreen'].forEach(s => document.getElementById(s).style.display = 'none');
+  ['projectsScreen', 'appScreen', 'reportScreen', 'clientReportScreen'].forEach(s => document.getElementById(s).style.display = 'none');
   document.getElementById(id).style.display = 'block';
 }
 
@@ -647,6 +658,101 @@ window.quickReport = id => {
 };
 
 window.closeReport = () => {
+  if (currentProjectId && projectData && getIds().includes(currentProjectId)) {
+    openProject(currentProjectId);
+  } else {
+    renderProjectsScreen();
+  }
+};
+
+/* ---- CLIENT REPORT ---- */
+function buildClientReport(p) {
+  let cost = 0, finCost = 0, furCost = 0;
+  (p.finish || []).forEach(x => { cost += x.cost; finCost += x.cost; });
+  (p.furn || []).forEach(x => { cost += x.cost; furCost += x.cost; });
+  const supFee = (finCost * 0.20) + (furCost * 0.10);
+  const supPct = finCost ? Math.round((finCost * 0.20) / finCost * 100) : 0;
+  const total = cost + supFee;
+  const now = new Date().toLocaleDateString('ar-EG', { year: 'numeric', month: 'long', day: 'numeric' });
+
+  const statusBadge = p2 => {
+    if (p2 >= 80) return '<span class="status-badge badge-green">مكتمل</span>';
+    if (p2 >= 40) return '<span class="status-badge badge-orange">جاري</span>';
+    return '<span class="status-badge badge-red">بداية</span>';
+  };
+
+  // rows: name | cost | progress bar | status (no paid / no remaining)
+  const itemRows = arr => arr.map(x => {
+    // progress based on paid internally but only show bar + %
+    const p2 = x.cost ? Math.min(Math.round((x.paid / x.cost) * 100), 100) : 0;
+    const c = p2 < 30 ? '#ff4d4d' : p2 < 70 ? '#ffaa00' : '#00e676';
+    return `<tr>
+      <td>${x.name}</td>
+      <td>${fmt(x.cost)}</td>
+      <td><div class="report-bar-wrap"><div class="report-bar" style="width:${p2}%;background:${c}"></div></div> ${p2}%</td>
+      <td>${statusBadge(p2)}</td>
+    </tr>`;
+  }).join('');
+
+  // overall progress
+  let totalPaid = 0;
+  (p.finish || []).forEach(x => totalPaid += x.paid);
+  (p.furn || []).forEach(x => totalPaid += x.paid);
+  const pct = cost ? Math.round((totalPaid / cost) * 100) : 0;
+
+  return `
+    <div class="report-hero">
+      <div class="report-hero-title">${p.meta.name || 'مشروع'}</div>
+      <div class="report-hero-stage">المرحلة: ${p.meta.stage || '—'}</div>
+      <div class="report-hero-date">تاريخ التقرير: ${now}</div>
+    </div>
+    <div class="report-kpis">
+      <div class="kpi-card"><div class="kpi-icon">📈</div><div class="kpi-label">نسبة الإنجاز</div><div class="kpi-value gold">${pct}%</div></div>
+      <div class="kpi-card"><div class="kpi-icon">💰</div><div class="kpi-label">إجمالي تكاليف التشطيبات</div><div class="kpi-value">${fmt(finCost)}</div></div>
+      <div class="kpi-card"><div class="kpi-icon">🛋️</div><div class="kpi-label">إجمالي تكاليف الفرش</div><div class="kpi-value">${fmt(furCost)}</div></div>
+      <div class="kpi-card"><div class="kpi-icon">🏗️</div><div class="kpi-label">رسوم الإشراف والتنفيذ</div><div class="kpi-value orange">${fmt(Math.round(supFee))}</div></div>
+      <div class="kpi-card"><div class="kpi-icon">🏷️</div><div class="kpi-label">الإجمالي الكلي شامل الإشراف</div><div class="kpi-value gold">${fmt(Math.round(total))}</div></div>
+    </div>
+    <div class="report-section">
+      <div class="report-section-title">🔨 تفاصيل التشطيبات</div>
+      <div style="overflow-x:auto">
+        <table class="report-table">
+          <tr><th>البند</th><th>التكلفة</th><th>الإنجاز</th><th>الحالة</th></tr>
+          ${itemRows(p.finish)}
+          <tr style="background:rgba(212,170,69,0.06)"><td><b>الإجمالي</b></td><td><b>${fmt(finCost)}</b></td><td colspan="2"></td></tr>
+        </table>
+      </div>
+    </div>
+    <div class="report-section">
+      <div class="report-section-title">🛋️ تفاصيل الفرش</div>
+      <div style="overflow-x:auto">
+        <table class="report-table">
+          <tr><th>البند</th><th>التكلفة</th><th>الإنجاز</th><th>الحالة</th></tr>
+          ${itemRows(p.furn)}
+          <tr style="background:rgba(212,170,69,0.06)"><td><b>الإجمالي</b></td><td><b>${fmt(furCost)}</b></td><td colspan="2"></td></tr>
+        </table>
+      </div>
+    </div>
+    <div class="report-section">
+      <div class="report-section-title">💼 ملخص التكاليف</div>
+      <div class="financial-grid">
+        <div class="fin-item"><div class="fin-item-label">تكاليف التشطيبات</div><div class="fin-item-val">${fmt(finCost)} ج.م</div></div>
+        <div class="fin-item"><div class="fin-item-label">تكاليف الفرش</div><div class="fin-item-val">${fmt(furCost)} ج.م</div></div>
+        <div class="fin-item"><div class="fin-item-label">رسوم الإشراف (20% تشطيب + 10% فرش)</div><div class="fin-item-val" style="color:var(--orange)">${fmt(Math.round(supFee))} ج.م</div></div>
+        <div class="fin-item"><div class="fin-item-label">الإجمالي الكلي شامل الإشراف</div><div class="fin-item-val" style="color:var(--gold)">${fmt(Math.round(total))} ج.م</div></div>
+      </div>
+    </div>
+    <button class="print-btn" onclick="window.print()">🖨️ طباعة / حفظ PDF</button>
+  `;
+}
+
+window.openClientReport = () => {
+  if (currentProjectId && projectData) saveProj(currentProjectId, projectData);
+  document.getElementById('clientReportBody').innerHTML = buildClientReport(projectData);
+  show('clientReportScreen');
+};
+
+window.closeClientReport = () => {
   if (currentProjectId && projectData && getIds().includes(currentProjectId)) {
     openProject(currentProjectId);
   } else {
