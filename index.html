@@ -1,0 +1,663 @@
+<!DOCTYPE html>
+<html lang="ar" dir="rtl">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Mostafa Afifi Innovations</title>
+<link href="https://fonts.googleapis.com/css2?family=Cairo:wght@200;300;400;600;700;900&display=swap" rel="stylesheet">
+<style>
+:root{
+  --gold:#d4aa45;--gold-light:#e8c96a;--gold-dim:#8a6e2a;
+  --bg:#080808;--bg2:#111;--bg3:#1a1a1a;--bg4:#222;
+  --text:#eee;--text-dim:#888;
+  --red:#ff4d4d;--orange:#ffaa00;--green:#00e676;
+  --radius:14px;
+}
+*{box-sizing:border-box;margin:0;padding:0;}
+body{font-family:'Cairo',sans-serif;background:var(--bg);color:var(--text);min-height:100vh;}
+
+/* SCREENS */
+#projectsScreen,#appScreen,#reportScreen{display:none;}
+
+/* ===== PROJECTS SCREEN ===== */
+.projects-header{
+  position:relative;height:240px;
+  background:url("https://images.unsplash.com/photo-1497366216548-37526070297c?auto=format&fit=crop&w=1400") no-repeat center/cover;
+  display:flex;align-items:center;justify-content:center;
+}
+.projects-header .overlay{position:absolute;inset:0;background:linear-gradient(160deg,rgba(0,0,0,0.6),rgba(0,0,0,0.92));}
+.projects-header-content{position:relative;z-index:2;text-align:center;}
+.brand-name{font-size:clamp(26px,5vw,50px);font-weight:900;letter-spacing:2px;
+  background:linear-gradient(135deg,#fff 30%,var(--gold) 100%);
+  -webkit-background-clip:text;-webkit-text-fill-color:transparent;}
+.brand-sub{font-size:15px;color:var(--gold);letter-spacing:6px;text-transform:uppercase;font-weight:300;}
+.brand-tag{font-size:11px;color:#aaa;letter-spacing:2px;margin-top:4px;}
+
+.projects-body{max-width:960px;margin:0 auto;padding:24px 16px;}
+.projects-top{display:flex;justify-content:space-between;align-items:center;margin-bottom:20px;flex-wrap:wrap;gap:10px;}
+.projects-top h2{font-size:17px;color:var(--gold);}
+
+.projects-grid{display:grid;grid-template-columns:repeat(auto-fill,minmax(230px,1fr));gap:14px;}
+.project-card{
+  background:var(--bg3);border:1px solid #252525;border-radius:var(--radius);
+  padding:18px;cursor:pointer;transition:.25s;position:relative;
+}
+.project-card:hover{border-color:var(--gold);transform:translateY(-3px);box-shadow:0 12px 32px rgba(0,0,0,0.5);}
+.project-card-actions{position:absolute;top:10px;left:10px;display:flex;gap:4px;}
+.proj-action-btn{background:transparent;border:none;color:#444;cursor:pointer;font-size:14px;padding:3px 6px;border-radius:6px;transition:.2s;}
+.proj-action-btn:hover{background:#1e1e1e;}
+.proj-action-btn.del:hover{color:var(--red);}
+.proj-action-btn.rep:hover{color:var(--gold);}
+.project-card-name{font-size:16px;font-weight:700;color:#fff;margin-bottom:3px;padding-left:48px;}
+.project-card-stage{font-size:11px;color:var(--gold);margin-bottom:10px;}
+.project-card-bar{height:5px;background:#222;border-radius:10px;overflow:hidden;margin-bottom:5px;}
+.project-card-fill{height:100%;background:linear-gradient(90deg,var(--gold-dim),var(--gold));border-radius:10px;}
+.project-card-pct{font-size:11px;color:var(--text-dim);}
+.project-card-stats{display:flex;gap:12px;margin-top:10px;padding-top:10px;border-top:1px solid #222;}
+.mini-stat{font-size:10px;color:var(--text-dim);text-align:center;flex:1;}
+.mini-stat b{display:block;font-size:12px;color:#fff;}
+.project-card-date{font-size:10px;color:#333;margin-top:8px;}
+
+.add-proj-card{
+  background:transparent;border:2px dashed #252525;border-radius:var(--radius);
+  padding:18px;cursor:pointer;transition:.25s;
+  display:flex;flex-direction:column;align-items:center;justify-content:center;gap:6px;
+  min-height:110px;color:var(--text-dim);
+}
+.add-proj-card:hover{border-color:var(--gold);color:var(--gold);}
+
+/* MODAL */
+.modal-bg{position:fixed;inset:0;background:rgba(0,0,0,0.82);display:flex;align-items:center;justify-content:center;z-index:200;opacity:0;pointer-events:none;transition:.3s;}
+.modal-bg.open{opacity:1;pointer-events:all;}
+.modal{background:var(--bg3);border:1px solid #333;border-radius:var(--radius);padding:26px;width:90%;max-width:400px;transform:translateY(20px);transition:.3s;}
+.modal-bg.open .modal{transform:translateY(0);}
+.modal h3{color:var(--gold);margin-bottom:16px;font-size:16px;}
+.modal input{width:100%;padding:10px 14px;background:var(--bg2);color:#fff;border:1px solid #2a2a2a;border-radius:10px;font-family:'Cairo',sans-serif;font-size:14px;text-align:center;margin-bottom:10px;transition:.3s;}
+.modal input:focus{outline:none;border-color:var(--gold);}
+.modal-btns{display:flex;gap:8px;justify-content:flex-end;margin-top:4px;}
+
+/* ===== APP SCREEN ===== */
+.app-topbar{background:var(--bg2);border-bottom:1px solid #1e1e1e;padding:11px 18px;display:flex;align-items:center;gap:12px;}
+.back-btn{background:transparent;border:1px solid #333;color:var(--text-dim);padding:6px 13px;border-radius:8px;cursor:pointer;font-family:'Cairo',sans-serif;font-size:12px;transition:.2s;}
+.back-btn:hover{border-color:var(--gold);color:var(--gold);}
+.topbar-info{flex:1;}
+.topbar-name{font-size:15px;font-weight:700;color:#fff;}
+.topbar-stage{font-size:11px;color:var(--gold);}
+.report-btn{background:var(--gold);border:none;color:#000;padding:7px 16px;border-radius:9px;cursor:pointer;font-family:'Cairo',sans-serif;font-size:12px;font-weight:700;transition:.2s;}
+.report-btn:hover{background:var(--gold-light);}
+
+.main-header{position:relative;height:280px;background:url("https://images.unsplash.com/photo-1497366216548-37526070297c?auto=format&fit=crop&w=1400") no-repeat center/cover;display:flex;align-items:center;justify-content:center;}
+.main-header .overlay{position:absolute;inset:0;background:linear-gradient(160deg,rgba(0,0,0,0.6),rgba(0,0,0,0.92));}
+.header-content{position:relative;z-index:2;display:flex;flex-direction:column;align-items:center;gap:7px;width:100%;max-width:580px;padding:0 18px;}
+.hbrand-name{font-size:clamp(24px,5vw,46px);font-weight:900;letter-spacing:2px;background:linear-gradient(135deg,#fff 30%,var(--gold) 100%);-webkit-background-clip:text;-webkit-text-fill-color:transparent;}
+.hbrand-sub{font-size:13px;color:var(--gold);letter-spacing:5px;text-transform:uppercase;font-weight:300;}
+.header-inputs{display:flex;gap:10px;flex-wrap:wrap;justify-content:center;width:100%;margin-top:6px;}
+.field-group{display:flex;flex-direction:column;align-items:center;gap:3px;}
+.field-label{font-size:10px;color:var(--gold);letter-spacing:2px;text-transform:uppercase;}
+.project-input{padding:8px 13px;width:200px;background:rgba(255,255,255,0.05);color:#fff;border:1px solid rgba(212,170,69,0.3);border-radius:9px;text-align:center;font-family:'Cairo',sans-serif;font-size:13px;transition:.3s;backdrop-filter:blur(10px);}
+.project-input:focus{outline:none;border-color:var(--gold);}
+
+.progress-section{background:var(--bg2);padding:14px 22px;border-bottom:1px solid #1e1e1e;display:flex;align-items:center;gap:13px;}
+.progress-label{font-size:11px;color:var(--text-dim);white-space:nowrap;min-width:65px;}
+.progress-track{flex:1;height:7px;background:#222;border-radius:20px;overflow:hidden;}
+.progress-fill{height:100%;border-radius:20px;background:linear-gradient(90deg,var(--gold-dim),var(--gold),var(--gold-light));transition:width .6s;box-shadow:0 0 8px rgba(212,170,69,0.25);}
+.progress-pct{font-size:17px;font-weight:700;color:var(--gold);min-width:46px;text-align:left;}
+
+.container{max-width:1100px;margin:0 auto;padding:18px 13px;display:grid;grid-template-columns:repeat(auto-fit,minmax(280px,1fr));gap:16px;}
+.card{background:var(--bg3);border:1px solid #252525;border-radius:var(--radius);padding:18px;transition:border-color .3s;}
+.card:hover{border-color:#333;}
+.card.full{grid-column:1/-1;}
+.card-title{font-size:14px;font-weight:700;color:var(--gold);display:flex;align-items:center;gap:7px;margin-bottom:14px;padding-bottom:10px;border-bottom:1px solid #252525;}
+.stat-row{display:flex;justify-content:space-between;align-items:center;padding:7px 0;border-bottom:1px solid #1e1e1e;font-size:13px;}
+.stat-row:last-child{border:none;}
+.stat-label{color:var(--text-dim);}
+.stat-value{font-weight:700;font-size:14px;color:#fff;direction:ltr;}
+.stat-value.neg{color:var(--red);}
+.stat-value.pos{color:var(--green);}
+.input-wrap{margin-bottom:11px;}
+.input-label{font-size:11px;color:var(--text-dim);margin-bottom:3px;display:block;}
+.card input[type=text],.card input[type=number]{width:100%;padding:9px 12px;background:var(--bg2);color:#fff;border:1px solid #2a2a2a;border-radius:9px;font-family:'Cairo',sans-serif;font-size:13px;text-align:center;transition:.3s;}
+.card input:focus{outline:none;border-color:var(--gold);}
+.table-wrap{overflow-x:auto;margin-top:6px;}
+table{width:100%;border-collapse:collapse;min-width:460px;}
+th{background:var(--bg2);color:var(--gold);padding:8px 9px;font-size:11px;letter-spacing:1px;text-align:center;font-weight:600;}
+td{padding:7px 5px;text-align:center;border-bottom:1px solid #1e1e1e;vertical-align:middle;}
+tr:hover td{background:rgba(255,255,255,0.02);}
+td input{width:100%;padding:5px 7px;font-size:12px;background:var(--bg2);color:#fff;border:1px solid #2a2a2a;border-radius:7px;font-family:'Cairo',sans-serif;text-align:center;transition:.2s;}
+td input:focus{outline:none;border-color:var(--gold);}
+.mini-bar-wrap{width:65px;height:5px;background:#222;border-radius:10px;overflow:hidden;margin:0 auto 2px;}
+.mini-bar{height:100%;border-radius:10px;transition:.4s;}
+.pct-text{font-size:10px;color:var(--text-dim);}
+.btn{padding:8px 15px;border:none;border-radius:9px;cursor:pointer;font-family:'Cairo',sans-serif;font-size:12px;font-weight:600;transition:.2s;}
+.btn-gold{background:var(--gold);color:#000;}
+.btn-gold:hover{background:var(--gold-light);}
+.btn-ghost{background:transparent;color:var(--text-dim);border:1px solid #333;}
+.btn-ghost:hover{border-color:var(--gold);color:var(--gold);}
+.btn-danger{background:#1e0a0a;color:var(--red);border:1px solid #3a1515;}
+.btn-danger:hover{background:#2a0f0f;}
+.btn-sm{padding:6px 12px;font-size:11px;}
+.btn-icon{background:transparent;color:var(--red);border:none;cursor:pointer;font-size:13px;padding:3px 7px;}
+.btn-icon:hover{color:#ff7070;}
+.add-btn-wrap{margin-top:11px;text-align:right;}
+.reset-wrap{text-align:center;}
+.reset-wrap p{font-size:11px;color:var(--text-dim);margin-top:7px;}
+
+/* ===== REPORT SCREEN ===== */
+.report-topbar{background:var(--bg2);border-bottom:1px solid #1e1e1e;padding:11px 18px;display:flex;align-items:center;gap:12px;}
+.report-body{max-width:860px;margin:0 auto;padding:24px 16px;}
+
+.report-hero{
+  background:linear-gradient(135deg,#111 0%,#1a1500 100%);
+  border:1px solid #2a2000;border-radius:var(--radius);
+  padding:28px;margin-bottom:24px;text-align:center;
+  position:relative;overflow:hidden;
+}
+.report-hero::before{content:'';position:absolute;inset:0;background:radial-gradient(circle at 50% 0%,rgba(212,170,69,0.08),transparent 70%);}
+.report-hero-title{font-size:22px;font-weight:900;color:#fff;margin-bottom:4px;position:relative;}
+.report-hero-stage{font-size:12px;color:var(--gold);letter-spacing:3px;text-transform:uppercase;position:relative;}
+.report-hero-date{font-size:11px;color:#555;margin-top:6px;position:relative;}
+
+.report-kpis{display:grid;grid-template-columns:repeat(auto-fit,minmax(140px,1fr));gap:12px;margin-bottom:22px;}
+.kpi-card{background:var(--bg3);border:1px solid #252525;border-radius:12px;padding:16px;text-align:center;}
+.kpi-icon{font-size:22px;margin-bottom:6px;}
+.kpi-label{font-size:11px;color:var(--text-dim);margin-bottom:4px;}
+.kpi-value{font-size:20px;font-weight:900;color:#fff;}
+.kpi-value.gold{color:var(--gold);}
+.kpi-value.green{color:var(--green);}
+.kpi-value.red{color:var(--red);}
+.kpi-value.orange{color:var(--orange);}
+
+.report-section{background:var(--bg3);border:1px solid #252525;border-radius:var(--radius);padding:20px;margin-bottom:18px;}
+.report-section-title{font-size:14px;font-weight:700;color:var(--gold);margin-bottom:14px;display:flex;align-items:center;gap:7px;padding-bottom:10px;border-bottom:1px solid #252525;}
+
+.report-table{width:100%;border-collapse:collapse;}
+.report-table th{background:var(--bg2);color:var(--gold);padding:8px 12px;font-size:11px;text-align:center;letter-spacing:1px;}
+.report-table td{padding:9px 12px;border-bottom:1px solid #1e1e1e;font-size:13px;text-align:center;}
+.report-table tr:last-child td{border:none;}
+.report-table tr:hover td{background:rgba(255,255,255,0.02);}
+
+.status-badge{display:inline-block;padding:3px 10px;border-radius:20px;font-size:10px;font-weight:700;}
+.badge-green{background:rgba(0,230,118,0.12);color:var(--green);border:1px solid rgba(0,230,118,0.2);}
+.badge-orange{background:rgba(255,170,0,0.12);color:var(--orange);border:1px solid rgba(255,170,0,0.2);}
+.badge-red{background:rgba(255,77,77,0.12);color:var(--red);border:1px solid rgba(255,77,77,0.2);}
+
+.report-bar-wrap{width:80px;height:5px;background:#222;border-radius:10px;overflow:hidden;display:inline-block;vertical-align:middle;margin-left:6px;}
+.report-bar{height:100%;border-radius:10px;}
+
+.financial-grid{display:grid;grid-template-columns:1fr 1fr;gap:10px;}
+.fin-item{background:var(--bg2);border-radius:10px;padding:14px;text-align:center;}
+.fin-item-label{font-size:11px;color:var(--text-dim);margin-bottom:5px;}
+.fin-item-val{font-size:18px;font-weight:800;direction:ltr;}
+
+.print-btn{width:100%;padding:13px;background:var(--gold);border:none;border-radius:10px;color:#000;font-family:'Cairo',sans-serif;font-size:14px;font-weight:700;cursor:pointer;transition:.2s;margin-top:4px;}
+.print-btn:hover{background:var(--gold-light);}
+
+/* TOAST */
+#toast{position:fixed;bottom:20px;left:50%;transform:translateX(-50%) translateY(80px);background:var(--bg3);border:1px solid var(--gold);color:var(--gold);padding:10px 22px;border-radius:12px;font-size:13px;z-index:999;transition:.4s;opacity:0;}
+#toast.show{transform:translateX(-50%) translateY(0);opacity:1;}
+
+@media print{
+  .report-topbar,.print-btn{display:none!important;}
+  body,#reportScreen{background:#fff!important;color:#000!important;}
+  .report-hero,.report-section,.kpi-card,.fin-item{background:#f5f5f5!important;border-color:#ddd!important;}
+  .kpi-label,.stat-label,.report-section-title,.fin-item-label{color:#555!important;}
+  .kpi-value,.fin-item-val,.report-table td,.report-hero-title{color:#000!important;}
+  .brand-name,.hbrand-name{-webkit-text-fill-color:#000!important;}
+}
+</style>
+</head>
+<body>
+
+<!-- ===== PROJECTS SCREEN ===== -->
+<div id="projectsScreen">
+  <div class="projects-header">
+    <div class="overlay"></div>
+    <div class="projects-header-content">
+      <div class="brand-name">Mostafa Afifi</div>
+      <div class="brand-sub">Innovations</div>
+      <div class="brand-tag">Where Design Meets Perfection</div>
+    </div>
+  </div>
+  <div class="projects-body">
+    <div class="projects-top">
+      <h2>📁 مشاريعك</h2>
+    </div>
+    <div class="projects-grid" id="projectsGrid"></div>
+  </div>
+</div>
+
+<!-- ===== APP SCREEN ===== -->
+<div id="appScreen">
+  <div class="app-topbar">
+    <button class="back-btn" onclick="goBack()">← المشاريع</button>
+    <div class="topbar-info">
+      <div class="topbar-name" id="topbarName"></div>
+      <div class="topbar-stage" id="topbarStage"></div>
+    </div>
+    <button class="report-btn" onclick="openReport()">📊 تقرير</button>
+  </div>
+
+  <header class="main-header">
+    <div class="overlay"></div>
+    <div class="header-content">
+      <div class="hbrand-name">Mostafa Afifi</div>
+      <div class="hbrand-sub">Innovations</div>
+      <div class="header-inputs">
+        <div class="field-group">
+          <span class="field-label">اسم المشروع</span>
+          <input id="projectName" class="project-input" placeholder="اسم المشروع" oninput="saveField('projectName',this.value)">
+        </div>
+        <div class="field-group">
+          <span class="field-label">المرحلة</span>
+          <input id="projectStage" class="project-input" placeholder="الأولى / الثانية ..." oninput="saveField('projectStage',this.value)">
+        </div>
+      </div>
+    </div>
+  </header>
+
+  <div class="progress-section">
+    <span class="progress-label">إجمالي الإنجاز</span>
+    <div class="progress-track"><div id="projectBar" class="progress-fill" style="width:0%"></div></div>
+    <span class="progress-pct" id="projectPercent">0%</span>
+  </div>
+
+  <div class="container">
+    <div class="card">
+      <div class="card-title">👤 حسابات العميل</div>
+      <div class="input-wrap">
+        <label class="input-label">المبلغ المدفوع من العميل</label>
+        <input type="number" id="clientPaid" placeholder="0" oninput="saveField('clientPaid',this.value);calc()">
+      </div>
+      <div class="stat-row"><span class="stat-label">رصيد العميل</span><span class="stat-value" id="clientBalance">0</span></div>
+    </div>
+
+    <div class="card">
+      <div class="card-title">💰 الموقف المالي</div>
+      <div class="stat-row"><span class="stat-label">إجمالي التكاليف</span><span class="stat-value" id="totalCost">0</span></div>
+      <div class="stat-row"><span class="stat-label">إجمالي المدفوعات</span><span class="stat-value pos" id="totalPaid">0</span></div>
+      <div class="stat-row"><span class="stat-label">المديونية</span><span class="stat-value neg" id="debt">0</span></div>
+    </div>
+
+    <div class="card">
+      <div class="card-title">🏗️ الإشراف</div>
+      <div class="input-wrap">
+        <label class="input-label">المبلغ المدفوع للإشراف</label>
+        <input type="number" id="supPaid" placeholder="0" oninput="saveField('supPaid',this.value);calc()">
+      </div>
+      <div class="stat-row"><span class="stat-label">إجمالي رسوم الإشراف</span><span class="stat-value" id="supFee">0</span></div>
+      <div class="stat-row"><span class="stat-label">المتبقي</span><span class="stat-value" id="supRemain">0</span></div>
+    </div>
+
+    <div class="card full">
+      <div class="card-title">🔨 بنود التشطيبات</div>
+      <div class="table-wrap"><table id="finishTable"></table></div>
+      <div class="add-btn-wrap"><button class="btn btn-ghost btn-sm" onclick="addItem('finish')">+ إضافة بند تشطيب</button></div>
+    </div>
+
+    <div class="card full">
+      <div class="card-title">🛋️ بنود الفرش</div>
+      <div class="table-wrap"><table id="furnTable"></table></div>
+      <div class="add-btn-wrap"><button class="btn btn-ghost btn-sm" onclick="addItem('furn')">+ إضافة بند فرش</button></div>
+    </div>
+
+    <div class="card full">
+      <div class="reset-wrap">
+        <button class="btn btn-danger" onclick="resetProject()">🗑️ مسح هذا المشروع</button>
+        <p>سيتم حذف جميع بيانات هذا المشروع فقط</p>
+      </div>
+    </div>
+  </div>
+</div>
+
+<!-- ===== REPORT SCREEN ===== -->
+<div id="reportScreen">
+  <div class="report-topbar">
+    <button class="back-btn" onclick="closeReport()">← رجوع للمشروع</button>
+    <div class="topbar-info">
+      <div class="topbar-name">📊 تقرير المشروع</div>
+    </div>
+  </div>
+  <div class="report-body" id="reportBody"></div>
+</div>
+
+<!-- MODAL -->
+<div class="modal-bg" id="modalBg">
+  <div class="modal">
+    <h3>➕ مشروع جديد</h3>
+    <input id="newProjName" placeholder="اسم المشروع">
+    <input id="newProjStage" placeholder="المرحلة (الأولى / الثانية ...)">
+    <div class="modal-btns">
+      <button class="btn btn-ghost btn-sm" onclick="closeModal()">إلغاء</button>
+      <button class="btn btn-gold btn-sm" onclick="createProject()">إنشاء</button>
+    </div>
+  </div>
+</div>
+
+<div id="toast"></div>
+
+<script>
+let currentProjectId = null;
+let projectData = null;
+
+/* ---- STORAGE ---- */
+const getIds = () => JSON.parse(localStorage.getItem('__projectIds') || '[]');
+const saveIds = ids => localStorage.setItem('__projectIds', JSON.stringify(ids));
+const getProj = id => JSON.parse(localStorage.getItem('proj_' + id) || 'null');
+const saveProj = (id, d) => localStorage.setItem('proj_' + id, JSON.stringify(d));
+
+/* ---- SCREENS ---- */
+function show(id) {
+  ['projectsScreen', 'appScreen', 'reportScreen'].forEach(s => document.getElementById(s).style.display = 'none');
+  document.getElementById(id).style.display = 'block';
+}
+
+/* ---- PROJECTS SCREEN ---- */
+function renderProjectsScreen() {
+  show('projectsScreen');
+  const ids = getIds();
+  const grid = document.getElementById('projectsGrid');
+  grid.innerHTML = '';
+  ids.forEach(id => {
+    const p = getProj(id); if (!p) return;
+    let cost = 0, paid = 0;
+    (p.finish || []).forEach(x => { cost += x.cost; paid += x.paid; });
+    (p.furn || []).forEach(x => { cost += x.cost; paid += x.paid; });
+    const pct = cost ? Math.round((paid / cost) * 100) : 0;
+    const clientPaid = Number(p.meta.clientPaid) || 0;
+    const bal = clientPaid - cost;
+    const date = p.meta.created ? new Date(p.meta.created).toLocaleDateString('ar-EG') : '';
+    const card = document.createElement('div');
+    card.className = 'project-card';
+    card.innerHTML = `
+      <div class="project-card-actions">
+        <button class="proj-action-btn rep" title="تقرير" onclick="event.stopPropagation();quickReport('${id}')">📊</button>
+        <button class="proj-action-btn del" title="حذف" onclick="event.stopPropagation();deleteProject('${id}')">✕</button>
+      </div>
+      <div class="project-card-name">${p.meta.name || 'بدون اسم'}</div>
+      <div class="project-card-stage">${p.meta.stage || '—'}</div>
+      <div class="project-card-bar"><div class="project-card-fill" style="width:${pct}%"></div></div>
+      <div class="project-card-pct">الإنجاز: ${pct}%</div>
+      <div class="project-card-stats">
+        <div class="mini-stat"><b>${fmt(cost)}</b>التكلفة</div>
+        <div class="mini-stat"><b style="color:${bal >= 0 ? '#00e676' : '#ff4d4d'}">${fmt(Math.abs(bal))}</b>${bal >= 0 ? 'رصيد' : 'عجز'}</div>
+      </div>
+      <div class="project-card-date">${date}</div>
+    `;
+    card.onclick = () => openProject(id);
+    grid.appendChild(card);
+  });
+  const add = document.createElement('div');
+  add.className = 'add-proj-card';
+  add.innerHTML = '<div style="font-size:26px">＋</div><div style="font-size:12px">مشروع جديد</div>';
+  add.onclick = openModal;
+  grid.appendChild(add);
+}
+
+/* ---- OPEN PROJECT ---- */
+function openProject(id) {
+  currentProjectId = id;
+  projectData = getProj(id);
+  show('appScreen');
+  document.getElementById('projectName').value = projectData.meta.name || '';
+  document.getElementById('projectStage').value = projectData.meta.stage || '';
+  document.getElementById('clientPaid').value = projectData.meta.clientPaid || '';
+  document.getElementById('supPaid').value = projectData.meta.supPaid || '';
+  document.getElementById('topbarName').innerText = projectData.meta.name || 'مشروع';
+  document.getElementById('topbarStage').innerText = projectData.meta.stage || '';
+  renderTables(); calc();
+}
+
+function goBack() {
+  if (currentProjectId && projectData) saveProj(currentProjectId, projectData);
+  currentProjectId = null; projectData = null;
+  renderProjectsScreen();
+}
+
+/* ---- SAVE FIELD ---- */
+window.saveField = (k, v) => {
+  if (!projectData) return;
+  projectData.meta[k] = v;
+  if (k === 'projectName') document.getElementById('topbarName').innerText = v;
+  if (k === 'projectStage') document.getElementById('topbarStage').innerText = v;
+  saveProj(currentProjectId, projectData);
+};
+
+/* ---- MODAL ---- */
+function openModal() { document.getElementById('modalBg').classList.add('open'); document.getElementById('newProjName').focus(); }
+function closeModal() { document.getElementById('modalBg').classList.remove('open'); document.getElementById('newProjName').value = ''; document.getElementById('newProjStage').value = ''; }
+
+window.createProject = () => {
+  const name = document.getElementById('newProjName').value.trim() || 'مشروع جديد';
+  const stage = document.getElementById('newProjStage').value.trim() || '';
+  const id = 'p' + Date.now();
+  saveProj(id, {
+    meta: { name, stage, clientPaid: '', supPaid: '', created: Date.now() },
+    finish: [
+      { id: 1, name: "كهرباء", cost: 50000, paid: 0 },
+      { id: 2, name: "سباكة", cost: 40000, paid: 0 },
+      { id: 3, name: "محارة", cost: 60000, paid: 0 },
+      { id: 4, name: "دهانات", cost: 30000, paid: 0 }
+    ],
+    furn: [
+      { id: 10, name: "ريسبشن", cost: 40000, paid: 0 },
+      { id: 11, name: "غرف نوم", cost: 50000, paid: 0 }
+    ]
+  });
+  const ids = getIds(); ids.push(id); saveIds(ids);
+  closeModal(); openProject(id); showToast('تم إنشاء المشروع ✓');
+};
+
+window.deleteProject = id => {
+  if (!confirm('حذف المشروع نهائياً؟')) return;
+  localStorage.removeItem('proj_' + id);
+  saveIds(getIds().filter(x => x !== id));
+  renderProjectsScreen(); showToast('تم حذف المشروع');
+};
+
+/* ---- TABLES ---- */
+function renderTables() {
+  renderTable('finishTable', projectData.finish, 'finish');
+  renderTable('furnTable', projectData.furn, 'furn');
+}
+
+function renderTable(tid, data, type) {
+  const t = document.getElementById(tid);
+  t.innerHTML = '<tr><th>البند</th><th>التكلفة (ج.م)</th><th>المدفوع (ج.م)</th><th>نسبة الإنجاز</th><th></th></tr>';
+  data.forEach(x => {
+    const p = x.cost ? Math.min(Math.round((x.paid / x.cost) * 100), 100) : 0;
+    const c = p < 30 ? '#ff4d4d' : p < 70 ? '#ffaa00' : '#00e676';
+    t.innerHTML += `<tr>
+      <td><input value="${x.name}" oninput="upd('${type}',${x.id},'name',this.value)"></td>
+      <td><input type="number" value="${x.cost}" oninput="upd('${type}',${x.id},'cost',this.value)"></td>
+      <td><input type="number" value="${x.paid}" oninput="upd('${type}',${x.id},'paid',this.value)"></td>
+      <td>
+        <div class="mini-bar-wrap"><div class="mini-bar" style="width:${p}%;background:${c}"></div></div>
+        <div class="pct-text">${p}%</div>
+      </td>
+      <td><button class="btn-icon" onclick="del('${type}',${x.id})">✕</button></td>
+    </tr>`;
+  });
+}
+
+window.upd = (type, id, k, v) => {
+  const arr = type === 'finish' ? projectData.finish : projectData.furn;
+  const item = arr.find(x => x.id === id); if (!item) return;
+  item[k] = k === 'name' ? v : Number(v);
+  saveProj(currentProjectId, projectData); calc();
+};
+
+window.addItem = type => {
+  const arr = type === 'finish' ? projectData.finish : projectData.furn;
+  arr.push({ id: Date.now(), name: 'بند جديد', cost: 0, paid: 0 });
+  saveProj(currentProjectId, projectData); renderTables(); calc();
+  showToast('تم إضافة البند ✓');
+};
+
+window.del = (type, id) => {
+  if (type === 'finish') projectData.finish = projectData.finish.filter(x => x.id !== id);
+  else projectData.furn = projectData.furn.filter(x => x.id !== id);
+  saveProj(currentProjectId, projectData); renderTables(); calc();
+};
+
+window.resetProject = () => {
+  if (!confirm('مسح بيانات هذا المشروع؟')) return;
+  saveIds(getIds().filter(x => x !== currentProjectId));
+  localStorage.removeItem('proj_' + currentProjectId);
+  goBack(); showToast('تم مسح المشروع');
+};
+
+/* ---- CALC ---- */
+window.calc = () => {
+  if (!projectData) return;
+  let cost = 0, paid = 0, finCost = 0, furCost = 0;
+  projectData.finish.forEach(x => { cost += x.cost; paid += x.paid; finCost += x.cost; });
+  projectData.furn.forEach(x => { cost += x.cost; paid += x.paid; furCost += x.cost; });
+
+  const clientPaid = Number(projectData.meta.clientPaid) || 0;
+  const bal = clientPaid - cost;
+  const balEl = document.getElementById('clientBalance');
+  balEl.innerText = fmt(Math.round(bal));
+  balEl.className = 'stat-value ' + (bal >= 0 ? 'pos' : 'neg');
+
+  const supPaid = Number(projectData.meta.supPaid) || 0;
+  const supFee = (finCost * 0.20) + (furCost * 0.10);
+  const supRem = supFee - supPaid;
+  document.getElementById('supFee').innerText = fmt(Math.round(supFee));
+  const sr = document.getElementById('supRemain');
+  sr.innerText = fmt(Math.round(supRem));
+  sr.className = 'stat-value ' + (supRem <= 0 ? 'pos' : 'neg');
+
+  document.getElementById('totalCost').innerText = fmt(cost);
+  document.getElementById('totalPaid').innerText = fmt(paid);
+  const d = document.getElementById('debt');
+  d.innerText = fmt(cost - paid);
+  d.className = 'stat-value ' + ((cost - paid) <= 0 ? 'pos' : 'neg');
+
+  const pct = cost ? (paid / cost) * 100 : 0;
+  document.getElementById('projectBar').style.width = pct + '%';
+  document.getElementById('projectPercent').innerText = Math.round(pct) + '%';
+  renderTables();
+};
+
+/* ---- REPORT ---- */
+function buildReport(p) {
+  let cost = 0, paid = 0, finCost = 0, furCost = 0;
+  (p.finish || []).forEach(x => { cost += x.cost; paid += x.paid; finCost += x.cost; });
+  (p.furn || []).forEach(x => { cost += x.cost; paid += x.paid; furCost += x.cost; });
+  const pct = cost ? Math.round((paid / cost) * 100) : 0;
+  const clientPaid = Number(p.meta.clientPaid) || 0;
+  const bal = clientPaid - cost;
+  const supPaid = Number(p.meta.supPaid) || 0;
+  const supFee = (finCost * 0.20) + (furCost * 0.10);
+  const supRem = supFee - supPaid;
+  const debt = cost - paid;
+  const now = new Date().toLocaleDateString('ar-EG', { year: 'numeric', month: 'long', day: 'numeric' });
+
+  const statusBadge = p2 => {
+    if (p2 >= 80) return '<span class="status-badge badge-green">مكتمل</span>';
+    if (p2 >= 40) return '<span class="status-badge badge-orange">جاري</span>';
+    return '<span class="status-badge badge-red">بداية</span>';
+  };
+
+  const itemRows = arr => arr.map(x => {
+    const p2 = x.cost ? Math.min(Math.round((x.paid / x.cost) * 100), 100) : 0;
+    const c = p2 < 30 ? '#ff4d4d' : p2 < 70 ? '#ffaa00' : '#00e676';
+    return `<tr>
+      <td>${x.name}</td>
+      <td>${fmt(x.cost)}</td>
+      <td>${fmt(x.paid)}</td>
+      <td>${fmt(x.cost - x.paid)}</td>
+      <td><div class="report-bar-wrap"><div class="report-bar" style="width:${p2}%;background:${c}"></div></div> ${p2}%</td>
+      <td>${statusBadge(p2)}</td>
+    </tr>`;
+  }).join('');
+
+  const finPaid = p.finish.reduce((s, x) => s + x.paid, 0);
+  const furPaid = p.furn.reduce((s, x) => s + x.paid, 0);
+
+  return `
+    <div class="report-hero">
+      <div class="report-hero-title">${p.meta.name || 'مشروع'}</div>
+      <div class="report-hero-stage">المرحلة: ${p.meta.stage || '—'}</div>
+      <div class="report-hero-date">تاريخ التقرير: ${now}</div>
+    </div>
+    <div class="report-kpis">
+      <div class="kpi-card"><div class="kpi-icon">📈</div><div class="kpi-label">نسبة الإنجاز</div><div class="kpi-value gold">${pct}%</div></div>
+      <div class="kpi-card"><div class="kpi-icon">💰</div><div class="kpi-label">إجمالي التكاليف</div><div class="kpi-value">${fmt(cost)}</div></div>
+      <div class="kpi-card"><div class="kpi-icon">✅</div><div class="kpi-label">إجمالي المدفوعات</div><div class="kpi-value green">${fmt(paid)}</div></div>
+      <div class="kpi-card"><div class="kpi-icon">⚠️</div><div class="kpi-label">المديونية</div><div class="kpi-value ${debt > 0 ? 'red' : 'green'}">${fmt(debt)}</div></div>
+      <div class="kpi-card"><div class="kpi-icon">👤</div><div class="kpi-label">رصيد العميل</div><div class="kpi-value ${bal >= 0 ? 'green' : 'red'}">${fmt(Math.abs(Math.round(bal)))}</div></div>
+      <div class="kpi-card"><div class="kpi-icon">🏗️</div><div class="kpi-label">متبقي الإشراف</div><div class="kpi-value ${supRem <= 0 ? 'green' : 'orange'}">${fmt(Math.round(Math.abs(supRem)))}</div></div>
+    </div>
+    <div class="report-section">
+      <div class="report-section-title">🔨 تفاصيل التشطيبات</div>
+      <div style="overflow-x:auto">
+        <table class="report-table">
+          <tr><th>البند</th><th>التكلفة</th><th>المدفوع</th><th>المتبقي</th><th>الإنجاز</th><th>الحالة</th></tr>
+          ${itemRows(p.finish)}
+          <tr style="background:rgba(212,170,69,0.06)"><td><b>الإجمالي</b></td><td><b>${fmt(finCost)}</b></td><td><b>${fmt(finPaid)}</b></td><td><b>${fmt(finCost - finPaid)}</b></td><td colspan="2"></td></tr>
+        </table>
+      </div>
+    </div>
+    <div class="report-section">
+      <div class="report-section-title">🛋️ تفاصيل الفرش</div>
+      <div style="overflow-x:auto">
+        <table class="report-table">
+          <tr><th>البند</th><th>التكلفة</th><th>المدفوع</th><th>المتبقي</th><th>الإنجاز</th><th>الحالة</th></tr>
+          ${itemRows(p.furn)}
+          <tr style="background:rgba(212,170,69,0.06)"><td><b>الإجمالي</b></td><td><b>${fmt(furCost)}</b></td><td><b>${fmt(furPaid)}</b></td><td><b>${fmt(furCost - furPaid)}</b></td><td colspan="2"></td></tr>
+        </table>
+      </div>
+    </div>
+    <div class="report-section">
+      <div class="report-section-title">💼 الموقف المالي الإجمالي</div>
+      <div class="financial-grid">
+        <div class="fin-item"><div class="fin-item-label">إجمالي التكاليف</div><div class="fin-item-val">${fmt(cost)} ج.م</div></div>
+        <div class="fin-item"><div class="fin-item-label">إجمالي المدفوعات</div><div class="fin-item-val" style="color:var(--green)">${fmt(paid)} ج.م</div></div>
+        <div class="fin-item"><div class="fin-item-label">المديونية</div><div class="fin-item-val" style="color:${debt > 0 ? 'var(--red)' : 'var(--green)'}">${fmt(debt)} ج.م</div></div>
+        <div class="fin-item"><div class="fin-item-label">رصيد العميل</div><div class="fin-item-val" style="color:${bal >= 0 ? 'var(--green)' : 'var(--red)'}">${fmt(Math.round(bal))} ج.م</div></div>
+        <div class="fin-item"><div class="fin-item-label">رسوم الإشراف</div><div class="fin-item-val">${fmt(Math.round(supFee))} ج.م</div></div>
+        <div class="fin-item"><div class="fin-item-label">متبقي الإشراف</div><div class="fin-item-val" style="color:${supRem <= 0 ? 'var(--green)' : 'var(--orange)'}">${fmt(Math.round(supRem))} ج.م</div></div>
+      </div>
+    </div>
+    <button class="print-btn" onclick="window.print()">🖨️ طباعة / حفظ PDF</button>
+  `;
+}
+
+window.openReport = () => {
+  if (currentProjectId && projectData) saveProj(currentProjectId, projectData);
+  document.getElementById('reportBody').innerHTML = buildReport(projectData);
+  show('reportScreen');
+};
+
+window.quickReport = id => {
+  const p = getProj(id); if (!p) return;
+  currentProjectId = id; projectData = p;
+  document.getElementById('reportBody').innerHTML = buildReport(p);
+  show('reportScreen');
+};
+
+window.closeReport = () => {
+  if (currentProjectId && projectData && getIds().includes(currentProjectId)) {
+    openProject(currentProjectId);
+  } else {
+    renderProjectsScreen();
+  }
+};
+
+/* ---- UTILS ---- */
+function fmt(n) { return Math.round(n).toLocaleString('ar-EG'); }
+
+window.showToast = msg => {
+  const t = document.getElementById('toast');
+  t.innerText = msg; t.classList.add('show');
+  setTimeout(() => t.classList.remove('show'), 2500);
+};
+
+document.getElementById('newProjName').addEventListener('keydown', e => { if (e.key === 'Enter') createProject(); });
+
+/* ---- INIT ---- */
+renderProjectsScreen();
+</script>
+</body>
+</html>
