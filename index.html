@@ -208,7 +208,6 @@ td input:focus{outline:none;border-color:var(--gold);}
 </head>
 <body>
 
-<!-- ===== PROJECTS SCREEN ===== -->
 <div id="projectsScreen">
   <div class="projects-header">
     <div class="overlay"></div>
@@ -226,7 +225,6 @@ td input:focus{outline:none;border-color:var(--gold);}
   </div>
 </div>
 
-<!-- ===== APP SCREEN ===== -->
 <div id="appScreen">
   <div class="app-topbar">
     <button class="back-btn" onclick="goBack()">← المشاريع</button>
@@ -266,7 +264,7 @@ td input:focus{outline:none;border-color:var(--gold);}
       <div class="card-title">👤 حسابات العميل</div>
       <div class="input-wrap">
         <label class="input-label">المبلغ المدفوع من العميل</label>
-        <input type="number" id="clientPaid" placeholder="0" oninput="saveField('clientPaid',this.value);calc()">
+        <input type="number" id="clientPaid" placeholder="0" onfocus="this.select()" oninput="saveField('clientPaid',this.value);calc()">
       </div>
       <div class="stat-row"><span class="stat-label">رصيد العميل</span><span class="stat-value" id="clientBalance">0</span></div>
     </div>
@@ -282,7 +280,7 @@ td input:focus{outline:none;border-color:var(--gold);}
       <div class="card-title">🏗️ الإشراف</div>
       <div class="input-wrap">
         <label class="input-label">المبلغ المدفوع للإشراف</label>
-        <input type="number" id="supPaid" placeholder="0" oninput="saveField('supPaid',this.value);calc()">
+        <input type="number" id="supPaid" placeholder="0" onfocus="this.select()" oninput="saveField('supPaid',this.value);calc()">
       </div>
       <div class="stat-row"><span class="stat-label">إجمالي رسوم الإشراف</span><span class="stat-value" id="supFee">0</span></div>
       <div class="stat-row"><span class="stat-label">المتبقي</span><span class="stat-value" id="supRemain">0</span></div>
@@ -309,7 +307,6 @@ td input:focus{outline:none;border-color:var(--gold);}
   </div>
 </div>
 
-<!-- ===== REPORT SCREEN ===== -->
 <div id="reportScreen">
   <div class="report-topbar">
     <button class="back-btn" onclick="closeReport()">← رجوع للمشروع</button>
@@ -320,7 +317,6 @@ td input:focus{outline:none;border-color:var(--gold);}
   <div class="report-body" id="reportBody"></div>
 </div>
 
-<!-- MODAL -->
 <div class="modal-bg" id="modalBg">
   <div class="modal">
     <h3>➕ مشروع جديد</h3>
@@ -466,10 +462,10 @@ function renderTable(tid, data, type) {
   data.forEach(x => {
     const p = x.cost ? Math.min(Math.round((x.paid / x.cost) * 100), 100) : 0;
     const c = p < 30 ? '#ff4d4d' : p < 70 ? '#ffaa00' : '#00e676';
-    t.innerHTML += `<tr>
-      <td><input value="${x.name}" oninput="upd('${type}',${x.id},'name',this.value)"></td>
-      <td><input type="number" value="${x.cost}" oninput="upd('${type}',${x.id},'cost',this.value)"></td>
-      <td><input type="number" value="${x.paid}" oninput="upd('${type}',${x.id},'paid',this.value)"></td>
+    t.innerHTML += `<tr id="row-${type}-${x.id}">
+      <td><input value="${x.name}" onfocus="this.select()" oninput="upd('${type}',${x.id},'name',this.value)"></td>
+      <td><input type="number" value="${x.cost}" onfocus="this.select()" oninput="upd('${type}',${x.id},'cost',this.value)"></td>
+      <td><input type="number" value="${x.paid}" onfocus="this.select()" oninput="upd('${type}',${x.id},'paid',this.value)"></td>
       <td>
         <div class="mini-bar-wrap"><div class="mini-bar" style="width:${p}%;background:${c}"></div></div>
         <div class="pct-text">${p}%</div>
@@ -483,7 +479,19 @@ window.upd = (type, id, k, v) => {
   const arr = type === 'finish' ? projectData.finish : projectData.furn;
   const item = arr.find(x => x.id === id); if (!item) return;
   item[k] = k === 'name' ? v : Number(v);
-  saveProj(currentProjectId, projectData); calc();
+  saveProj(currentProjectId, projectData); 
+  
+  // تحديث النسبة المئوية فوراً في الصف الحالي بدون إعادة رسم الجدول
+  const row = document.getElementById(`row-${type}-${id}`);
+  if(row){
+    const p = item.cost ? Math.min(Math.round((item.paid / item.cost) * 100), 100) : 0;
+    const c = p < 30 ? '#ff4d4d' : p < 70 ? '#ffaa00' : '#00e676';
+    row.querySelector('.mini-bar').style.width = p + '%';
+    row.querySelector('.mini-bar').style.background = c;
+    row.querySelector('.pct-text').innerText = p + '%';
+  }
+  
+  calc(); 
 };
 
 window.addItem = type => {
@@ -536,7 +544,8 @@ window.calc = () => {
   const pct = cost ? (paid / cost) * 100 : 0;
   document.getElementById('projectBar').style.width = pct + '%';
   document.getElementById('projectPercent').innerText = Math.round(pct) + '%';
-  renderTables();
+  
+  // تم حذف renderTables() من هنا لمنع فقدان التركيز
 };
 
 /* ---- REPORT ---- */
